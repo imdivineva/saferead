@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>SafeRead — Cybersecurity Library for Everyone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#FAF8F5;
+  --surface:#FFFFFF;
+  --surface2:#F3F0EB;
+  --border:#E8E4DD;
+  --border2:#D4CFC6;
+  --ink:#1C2333;
+  --ink2:#4A5168;
+  --ink3:#8A90A2;
+  --sage:#4A7C6F;
+  --sage-light:#EBF2F0;
+  --sage-mid:#C5DDD9;
+  --gold:#C9922A;
+  --gold-light:#FBF4E8;
+  --gold-mid:#EDD9AC;
+  --red:#C0392B;
+  --red-light:#FBEAE9;
+  --blue:#2C5F8A;
+  --blue-light:#EAF1F8;
+  --serif:'Literata',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --r:8px;
+  --r-lg:14px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;min-height:100vh;display:flex;flex-direction:column}
+
+/* ── Masthead ── */
+.masthead{background:var(--surface);border-bottom:2px solid var(--ink);padding:0 32px}
+.masthead-top{display:flex;align-items:center;justify-content:space-between;padding:14px 0 10px}
+.brand{display:flex;flex-direction:column;gap:2px}
+.brand-name{font-family:var(--serif);font-size:26px;font-weight:600;letter-spacing:-.02em;color:var(--ink)}
+.brand-name span{color:var(--sage)}
+.brand-tagline{font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase}
+.masthead-right{display:flex;align-items:center;gap:10px}
+.key-pill{display:flex;align-items:center;gap:6px;padding:7px 14px;border:1px solid var(--border2);border-radius:20px;font-size:13px;cursor:pointer;background:var(--bg);transition:all .14s}
+.key-pill:hover{border-color:var(--sage);color:var(--sage)}
+.key-pill input{border:none;background:none;font-family:var(--mono);font-size:11px;color:var(--ink2);outline:none;width:160px}
+.key-pill input::placeholder{color:var(--ink3)}
+.key-save{background:var(--sage);color:#fff;border:none;border-radius:20px;padding:7px 16px;font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;transition:opacity .14s}
+.key-save:hover{opacity:.85}
+.api-indicator{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px}
+.api-dot{width:7px;height:7px;border-radius:50%;background:var(--border2);flex-shrink:0}
+.api-dot.live{background:var(--sage)}
+.masthead-nav{display:flex;gap:0;border-top:1px solid var(--border);overflow-x:auto}
+.nav-link{padding:10px 16px;font-size:13px;color:var(--ink3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .12s;white-space:nowrap;user-select:none;font-weight:500}
+.nav-link:hover{color:var(--ink)}
+.nav-link.on{color:var(--sage);border-bottom-color:var(--sage)}
+
+/* ── Layout ── */
+.page{display:grid;grid-template-columns:220px 1fr;gap:0;flex:1;max-width:1200px;margin:0 auto;width:100%;padding:0 16px}
+
+/* ── Sidebar ── */
+.sidebar{border-right:1px solid var(--border);padding:28px 20px 28px 0}
+.sidebar-section{margin-bottom:28px}
+.sidebar-label{font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px;display:block}
+.topic-btn{display:flex;align-items:center;justify-content:space-between;width:100%;text-align:left;padding:7px 10px;border-radius:var(--r);background:none;border:none;font-family:var(--sans);font-size:13px;color:var(--ink2);cursor:pointer;transition:all .12s;margin-bottom:2px}
+.topic-btn:hover{background:var(--surface2);color:var(--ink)}
+.topic-btn.on{background:var(--sage-light);color:var(--sage);font-weight:500}
+.topic-count{font-family:var(--mono);font-size:10px;color:var(--ink3)}
+.topic-btn.on .topic-count{color:var(--sage)}
+.level-chip{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;border:1px solid var(--border2);color:var(--ink2);cursor:pointer;margin:0 4px 6px 0;transition:all .12s;background:none}
+.level-chip:hover{border-color:var(--sage);color:var(--sage)}
+.level-chip.on{background:var(--sage);color:#fff;border-color:var(--sage)}
+.search-box{width:100%;padding:8px 12px;border:1px solid var(--border2);border-radius:var(--r);font-family:var(--sans);font-size:13px;color:var(--ink);background:var(--surface);outline:none;transition:border-color .14s}
+.search-box:focus{border-color:var(--sage)}
+.search-box::placeholder{color:var(--ink3)}
+
+/* ── Main content ── */
+.main{padding:28px 0 28px 28px;min-width:0}
+
+/* Daily briefing */
+.briefing{background:var(--ink);border-radius:var(--r-lg);padding:22px 24px;margin-bottom:28px;position:relative;overflow:hidden}
+.briefing::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:var(--sage);opacity:.15}
+.briefing-eye{font-family:var(--mono);font-size:10px;color:var(--sage-mid);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.briefing-eye::before{content:'';width:20px;height:1px;background:var(--sage-mid)}
+.briefing-title{font-family:var(--serif);font-size:18px;font-weight:600;color:#fff;margin-bottom:8px;line-height:1.4}
+.briefing-body{font-size:14px;color:#A8ADBF;line-height:1.7;margin-bottom:14px}
+.briefing-body b{color:#D4D8E8}
+.briefing-actions{display:flex;gap:8px;align-items:center}
+.refresh-btn{background:var(--sage);color:#fff;border:none;border-radius:var(--r);padding:7px 16px;font-size:13px;font-weight:500;cursor:pointer;transition:opacity .14s}
+.refresh-btn:hover{opacity:.85}
+.refresh-btn:disabled{opacity:.4;cursor:not-allowed}
+.briefing-spin{display:flex;align-items:center;gap:8px;font-size:13px;color:#A8ADBF}
+.spin{width:14px;height:14px;border:2px solid #3D4358;border-top-color:var(--sage);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Section headers */
+.section-eyebrow{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.section-title{font-family:var(--serif);font-size:19px;font-weight:600;color:var(--ink)}
+.section-count{font-family:var(--mono);font-size:11px;color:var(--ink3)}
+
+/* Article cards */
+.articles-grid{display:flex;flex-direction:column;gap:0}
+.article-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px 22px;margin-bottom:14px;transition:border-color .14s,box-shadow .14s;cursor:pointer;position:relative}
+.article-card:hover{border-color:var(--sage-mid);box-shadow:0 2px 12px rgba(74,124,111,.08)}
+.article-card.featured{border-left:3px solid var(--sage);background:linear-gradient(to right, var(--sage-light) 0%, var(--surface) 60%)}
+.card-top{display:flex;align-items:flex-start;gap:14px}
+.card-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;margin-top:2px}
+.card-meta{flex:1;min-width:0}
+.card-tags{display:flex;gap=4px;flex-wrap:wrap;margin-bottom:6px;gap:4px}
+.tag{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:4px;font-weight:500;letter-spacing:.04em}
+.tag-topic{background:var(--sage-light);color:var(--sage)}
+.tag-level{background:var(--gold-light);color:var(--gold)}
+.tag-read{background:var(--surface2);color:var(--ink3)}
+.tag-new{background:var(--red-light);color:var(--red)}
+.card-title{font-family:var(--serif);font-size:17px;font-weight:600;color:var(--ink);line-height:1.35;margin-bottom:5px}
+.card-desc{font-size:13px;color:var(--ink2);line-height:1.6;margin-bottom:10px}
+.card-footer{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.source-badge{font-family:var(--mono);font-size:11px;color:var(--blue);background:var(--blue-light);padding:3px 10px;border-radius:4px}
+.read-link{font-size:12px;font-weight:500;color:var(--sage);text-decoration:none;display:flex;align-items:center;gap:4px;margin-left:auto}
+.read-link:hover{text-decoration:underline}
+.bookmark-btn{background:none;border:1px solid var(--border2);border-radius:6px;padding:4px 8px;font-size:12px;color:var(--ink3);cursor:pointer;transition:all .14s}
+.bookmark-btn:hover{border-color:var(--gold);color:var(--gold)}
+.bookmark-btn.saved{background:var(--gold-light);border-color:var(--gold-mid);color:var(--gold)}
+
+/* Ask Claude */
+.ask-section{background:var(--sage-light);border:1px solid var(--sage-mid);border-radius:var(--r-lg);padding:20px 22px;margin-bottom:28px}
+.ask-eye{font-family:var(--mono);font-size:10px;color:var(--sage);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.ask-title{font-family:var(--serif);font-size:16px;font-weight:600;color:var(--ink);margin-bottom:12px}
+.ask-input-row{display:flex;gap:8px}
+.ask-input{flex:1;border:1px solid var(--sage-mid);border-radius:var(--r);padding:9px 12px;font-family:var(--sans);font-size:13px;color:var(--ink);background:var(--surface);outline:none;transition:border-color .14s}
+.ask-input:focus{border-color:var(--sage)}
+.ask-input::placeholder{color:var(--ink3)}
+.ask-btn{background:var(--sage);color:#fff;border:none;border-radius:var(--r);padding:9px 18px;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;transition:opacity .14s}
+.ask-btn:hover{opacity:.85}
+.ask-btn:disabled{opacity:.4;cursor:not-allowed}
+.ask-result{margin-top:14px;padding:14px 16px;background:var(--surface);border-radius:var(--r);border:1px solid var(--sage-mid);font-size:13px;color:var(--ink2);line-height:1.75;display:none}
+.ask-result b{color:var(--ink);font-weight:500}
+.quick-qs{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.quick-q{background:var(--surface);border:1px solid var(--sage-mid);border-radius:20px;padding:5px 14px;font-size:12px;color:var(--sage);cursor:pointer;transition:all .12s}
+.quick-q:hover{background:var(--sage);color:#fff}
+
+/* Empty / loading */
+.empty{text-align:center;padding:40px 20px;color:var(--ink3);font-family:var(--serif);font-size:15px;font-style:italic}
+.load-bar{height:2px;background:var(--border);border-radius:1px;margin-bottom:14px;overflow:hidden}
+.load-bar::after{content:'';display:block;height:100%;width:35%;background:var(--sage);animation:sweep 1s ease-in-out infinite}
+@keyframes sweep{0%{transform:translateX(-150%)}100%{transform:translateX(380%)}}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;font-size:13px;padding:10px 18px;border-radius:var(--r);font-family:var(--sans);opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;z-index:999}
+.toast.show{opacity:1;transform:translateY(0)}
+
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+footer{border-top:1px solid var(--border);padding:16px 32px;font-size:12px;color:var(--ink3);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;background:var(--surface)}
+footer a{color:var(--sage);text-decoration:none}
+
+@media(max-width:720px){.page{grid-template-columns:1fr}.sidebar{display:none}.masthead{padding:0 16px}}
+</style>
+</head>
+<body>
+
+<!-- Masthead -->
+<div class="masthead">
+  <div class="masthead-top">
+    <div class="brand">
+      <div class="brand-name">Safe<span>Read</span></div>
+      <div class="brand-tagline">Cybersecurity for everyday people</div>
+    </div>
+    <div class="masthead-right">
+      <div class="api-indicator">
+        <div class="api-dot" id="api-dot"></div>
+        <span id="api-label" style="font-family:var(--mono);font-size:11px;color:var(--ink3)">No API key</span>
+      </div>
+      <div class="key-pill">
+        <input type="password" id="api-input" placeholder="sk-ant-... (Anthropic API key)" />
+        <button class="key-save" onclick="saveKey()">Connect</button>
+      </div>
+    </div>
+  </div>
+  <nav class="masthead-nav">
+    <div class="nav-link on" onclick="filterTopic('all',this)">All Topics</div>
+    <div class="nav-link" onclick="filterTopic('social',this)">Social Media Safety</div>
+    <div class="nav-link" onclick="filterTopic('passwords',this)">Passwords</div>
+    <div class="nav-link" onclick="filterTopic('phishing',this)">Phishing & Scams</div>
+    <div class="nav-link" onclick="filterTopic('privacy',this)">Privacy</div>
+    <div class="nav-link" onclick="filterTopic('devices',this)">Device Security</div>
+    <div class="nav-link" onclick="filterTopic('bookmarks',this)">⭐ Saved</div>
+  </nav>
+</div>
+
+<div class="page">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <span class="sidebar-label">Search</span>
+      <input class="search-box" id="search-input" placeholder="Search articles…" oninput="searchArticles(this.value)"/>
+    </div>
+    <div class="sidebar-section">
+      <span class="sidebar-label">Reading Level</span>
+      <div>
+        <span class="level-chip on" onclick="filterLevel('all',this)">All</span>
+        <span class="level-chip" onclick="filterLevel('beginner',this)">Beginner</span>
+        <span class="level-chip" onclick="filterLevel('intermediate',this)">Intermediate</span>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <span class="sidebar-label">Topics</span>
+      <button class="topic-btn on" onclick="filterTopic('all',this)">🗂 All articles <span class="topic-count" id="tc-all">14</span></button>
+      <button class="topic-btn" onclick="filterTopic('social',this)">📱 Social Media <span class="topic-count" id="tc-social">5</span></button>
+      <button class="topic-btn" onclick="filterTopic('passwords',this)">🔑 Passwords <span class="topic-count" id="tc-passwords">2</span></button>
+      <button class="topic-btn" onclick="filterTopic('phishing',this)">🎣 Phishing & Scams <span class="topic-count" id="tc-phishing">3</span></button>
+      <button class="topic-btn" onclick="filterTopic('privacy',this)">🛡 Privacy <span class="topic-count" id="tc-privacy">2</span></button>
+      <button class="topic-btn" onclick="filterTopic('devices',this)">💻 Device Security <span class="topic-count" id="tc-devices">2</span></button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- Daily Briefing -->
+    <div class="briefing" id="briefing">
+      <div class="briefing-eye">Today's safety note</div>
+      <div class="briefing-title" id="briefing-title">Loading your daily security tip…</div>
+      <div class="briefing-body" id="briefing-body">Connect your Anthropic API key to get a personalized daily cybersecurity tip written in plain language — no jargon, just practical advice for staying safe online.</div>
+      <div class="briefing-actions">
+        <button class="refresh-btn" id="refresh-btn" onclick="loadBriefing()" disabled>Get today's tip</button>
+        <div class="briefing-spin" id="briefing-spin" style="display:none"><div class="spin"></div> Writing your tip…</div>
+      </div>
+    </div>
+
+    <!-- Ask Claude -->
+    <div class="ask-section">
+      <div class="ask-eye">✦ Ask anything</div>
+      <div class="ask-title">Have a security question? Ask in plain English.</div>
+      <div class="ask-input-row">
+        <input class="ask-input" id="ask-input" placeholder="e.g. Is it safe to use the same password everywhere?" />
+        <button class="ask-btn" id="ask-btn" onclick="askClaude()" disabled>Ask →</button>
+      </div>
+      <div class="quick-qs">
+        <span class="quick-q" onclick="quickAsk('How do I know if my account was hacked?')">Was I hacked?</span>
+        <span class="quick-q" onclick="quickAsk('What should I do if I clicked a suspicious link?')">Clicked a bad link</span>
+        <span class="quick-q" onclick="quickAsk('Is public Wi-Fi safe to use?')">Public Wi-Fi risks</span>
+        <span class="quick-q" onclick="quickAsk('How do I make my Instagram account more private?')">Instagram privacy</span>
+        <span class="quick-q" onclick="quickAsk('What is two-factor authentication and should I use it?')">What is 2FA?</span>
+        <span class="quick-q" onclick="quickAsk('How do I spot a phishing email?')">Spot phishing</span>
+      </div>
+      <div class="ask-result" id="ask-result"></div>
+    </div>
+
+    <!-- Articles -->
+    <div class="section-eyebrow">
+      <div class="section-title" id="section-title">All Articles</div>
+      <div class="section-count" id="section-count">14 articles</div>
+    </div>
+    <div class="articles-grid" id="articles-grid"></div>
+
+  </main>
+</div>
+
+<footer>
+  <span>SafeRead — Cybersecurity learning for beginners. Articles link to original, reputable sources. Always verify information independently.</span>
+  <span>Powered by <a href="https://anthropic.com" target="_blank">Anthropic Claude</a> (Free Plan)</span>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let apiKey = '';
+let activeLevel = 'all';
+let activeTopic = 'all';
+let searchQuery = '';
+let bookmarks = new Set(JSON.parse(localStorage.getItem('sr_bookmarks')||'[]'));
+
+const ARTICLES = [
+  {
+    id:1, topic:'social', level:'beginner', featured:true,
+    icon:'📱', iconBg:'#EBF2F0',
+    title:'Your Instagram Privacy Settings: A Complete Beginner's Guide',
+    desc:'Most people leave their Instagram accounts wide open without realizing it. This guide walks you through every privacy setting in plain language — who can see your posts, who can message you, and how to stop strangers from tracking your location.',
+    source:'Electronic Frontier Foundation', sourceUrl:'https://www.eff.org/issues/privacy',
+    readTime:'6 min read', isNew:true,
+    tags:['Social Media','Beginner'],
+    summary:'Instagram collects more data than you might think. The most important settings to change immediately are: set your account to Private, disable location tagging on photos, turn off activity status, and limit who can share your stories.'
+  },
+  {
+    id:2, topic:'phishing', level:'beginner', featured:false,
+    icon:'🎣', iconBg:'#FBEAE9',
+    title:'How to Spot a Fake Message Before You Click',
+    desc:'Scam messages are getting incredibly convincing — they can look like they're from your bank, a delivery company, or even a friend. Learn the five warning signs that reveal a message is fake, even when it looks real.',
+    source:'Google Safety Center', sourceUrl:'https://safety.google/intl/en_us/',
+    readTime:'5 min read', isNew:true,
+    tags:['Phishing','Beginner'],
+    summary:'The five red flags: urgent language ("act now or lose access"), requests for passwords or payment, mismatched sender addresses (look carefully at every letter), links that don\'t match the company\'s real website, and unexpected attachments.'
+  },
+  {
+    id:3, topic:'passwords', level:'beginner', featured:false,
+    icon:'🔑', iconBg:'#FBF4E8',
+    title:'Why Every Account Needs Its Own Password — And How to Actually Do It',
+    desc:'Using one password everywhere feels convenient until one website gets hacked and criminals try that same password on your bank. Here's how to fix this problem without memorizing dozens of passwords.',
+    source:'Have I Been Pwned', sourceUrl:'https://haveibeenpwned.com',
+    readTime:'7 min read', isNew:false,
+    tags:['Passwords','Beginner'],
+    summary:'The solution is a password manager — an app that remembers all your passwords so you only need to remember one master password. Free options include Bitwarden and KeePassXC. Once set up, it also auto-fills passwords so logging in becomes faster, not slower.'
+  },
+  {
+    id:4, topic:'social', level:'beginner', featured:false,
+    icon:'👁', iconBg:'#EAF1F8',
+    title:'What Facebook Actually Knows About You (And How to See It)',
+    desc:'Facebook's "Off-Facebook Activity" feature reveals all the websites and apps that share your data with Facebook, even when you're not on Facebook. This article explains what it means and how to limit it.',
+    source:'Mozilla Foundation', sourceUrl:'https://foundation.mozilla.org/en/',
+    readTime:'5 min read', isNew:false,
+    tags:['Social Media','Privacy','Beginner'],
+    summary:'Go to Settings → Your Facebook Information → Off-Facebook Activity. You'll likely see hundreds of companies. You can clear this history and disconnect future activity. This won\'t stop tracking entirely but significantly reduces the data Facebook collects about your browsing.'
+  },
+  {
+    id:5, topic:'phishing', level:'beginner', featured:false,
+    icon:'💰', iconBg:'#FBEAE9',
+    title:'The Most Common Online Scams Targeting Ordinary People Right Now',
+    desc:'Criminals keep adapting their tactics. This roundup covers the scams hitting ordinary people in 2024 — fake job offers, romance scams, "you've won a prize" texts, and impersonation of government agencies.',
+    source:'Federal Trade Commission', sourceUrl:'https://consumer.ftc.gov/features/scam-alerts',
+    readTime:'8 min read', isNew:true,
+    tags:['Phishing','Scams','Beginner'],
+    summary:'The FTC\'s top reported scams involve imposter fraud (someone pretending to be the government or a tech company), online shopping fraud, and investment scams. The single most effective defense: slow down. Scammers create urgency — take a breath before clicking anything.'
+  },
+  {
+    id:6, topic:'privacy', level:'beginner', featured:false,
+    icon:'🕵', iconBg:'#F3F0EB',
+    title:'Your Phone Knows Where You Sleep. Here's How to Limit Location Tracking.',
+    desc:'Every app that asks for your location is collecting data that can reveal your home, workplace, and daily routine. This guide shows you exactly which app permissions to change on both iPhone and Android.',
+    source:'Consumer Reports', sourceUrl:'https://www.consumerreports.org/electronics-computers/privacy/',
+    readTime:'6 min read', isNew:false,
+    tags:['Privacy','Devices','Beginner'],
+    summary:'On iPhone: Settings → Privacy & Security → Location Services. Change most apps to "While Using" or "Never." On Android: Settings → Privacy → Permission manager → Location. Only maps and navigation apps genuinely need "Always" access — revoke it from everything else.'
+  },
+  {
+    id:7, topic:'social', level:'intermediate', featured:false,
+    icon:'🔒', iconBg:'#EBF2F0',
+    title:'Two-Factor Authentication Explained — And Why SMS Isn\'t Enough',
+    desc:'Two-factor authentication adds a second check when you log in — but not all methods are equally secure. SMS codes can be intercepted. Learn what 2FA is, why you should use it, and which method actually protects you.',
+    source:'Electronic Frontier Foundation', sourceUrl:'https://www.eff.org/deeplinks/2017/09/guide-common-types-two-factor-authentication-web',
+    readTime:'7 min read', isNew:false,
+    tags:['Social Media','Passwords','Intermediate'],
+    summary:'Ranked from most to least secure: hardware keys (e.g. YubiKey) > authenticator apps (Google Authenticator, Authy) > SMS text codes. For most people, an authenticator app is the sweet spot — free, easy to use, and far more secure than SMS.'
+  },
+  {
+    id:8, topic:'social', level:'beginner', featured:false,
+    icon:'💬', iconBg:'#EBF2F0',
+    title:'Is WhatsApp Actually Private? What "End-to-End Encryption" Really Means',
+    desc:'WhatsApp says your messages are encrypted, and that\'s true — but there are important limitations most people don\'t know about. Your message content is private, but your metadata (who you talk to, when, how often) is not.',
+    source:'Signal Foundation', sourceUrl:'https://signal.org/blog/',
+    readTime:'5 min read', isNew:false,
+    tags:['Social Media','Privacy','Beginner'],
+    summary:'End-to-end encryption means only you and the recipient can read the messages — not even WhatsApp. But WhatsApp (owned by Meta) still collects your contact list, device info, and who you communicate with. For the most private messaging, use Signal, which collects almost no metadata.'
+  },
+  {
+    id:9, topic:'phishing', level:'beginner', featured:false,
+    icon:'📧', iconBg:'#FBEAE9',
+    title:'Safe Email Habits That Take 30 Seconds and Could Save Your Accounts',
+    desc:'You don\'t need to be a tech expert to use email safely. A few simple habits — checking sender addresses, never opening unexpected attachments, and knowing when to be suspicious — block the vast majority of attacks.',
+    source:'Krebs on Security', sourceUrl:'https://krebsonsecurity.com',
+    readTime:'4 min read', isNew:false,
+    tags:['Phishing','Email','Beginner'],
+    summary:'Habit checklist: (1) Hover over links before clicking to see the real URL. (2) Sender name ≠ sender email — always check the actual address. (3) Legitimate companies never ask for your password by email. (4) When in doubt, go directly to the website instead of clicking the link.'
+  },
+  {
+    id:10, topic:'devices', level:'beginner', featured:false,
+    icon:'📲', iconBg:'#EAF1F8',
+    title:'Why "Update Available" Is the Most Important Security Notification on Your Phone',
+    desc:'Delaying software updates is one of the most common — and most dangerous — mistakes people make. Criminals actively scan for phones and computers running old software with known vulnerabilities.',
+    source:'National Cybersecurity Alliance', sourceUrl:'https://staysafeonline.org',
+    readTime:'4 min read', isNew:false,
+    tags:['Devices','Beginner'],
+    summary:'Most major hacks exploit vulnerabilities that already have patches available — they work because people didn\'t update. Turn on automatic updates for your operating system and apps. This one change alone eliminates a huge portion of common attack paths.'
+  },
+  {
+    id:11, topic:'social', level:'intermediate', featured:false,
+    icon:'🌐', iconBg:'#EBF2F0',
+    title:'The Data Your TikTok Profile Quietly Reveals About You',
+    desc:'TikTok collects an unusual amount of data, and some of it can reveal information you didn\'t intend to share. This article breaks down what the app collects, what\'s actually concerning, and what you can do about it.',
+    source:'Wired', sourceUrl:'https://www.wired.com/story/tiktok-privacy/',
+    readTime:'7 min read', isNew:false,
+    tags:['Social Media','Privacy','Intermediate'],
+    summary:'TikTok collects your device info, location, browsing history within the app, facial and voice data from videos, and clipboard content. Practical steps: use the app (not browser), limit app permissions in phone settings, set your account to private, and disable personalized ads in settings.'
+  },
+  {
+    id:12, topic:'passwords', level:'intermediate', featured:false,
+    icon:'🔐', iconBg:'#FBF4E8',
+    title:'How Strong Is Your Password, Really? The Math Behind Password Security',
+    desc:'Password strength checkers often focus on the wrong things. A password like "P@ssw0rd1" scores well but is instantly crackable. This explains what actually makes passwords unguessable — without any math degree required.',
+    source:'Have I Been Pwned', sourceUrl:'https://haveibeenpwned.com/Passwords',
+    readTime:'6 min read', isNew:false,
+    tags:['Passwords','Intermediate'],
+    summary:'Length beats complexity every time. "correct horse battery staple" (four random words) is exponentially harder to crack than "P@ssw0rd!" because length multiplies possibilities far faster than symbols. Aim for 16+ characters. A passphrase of random words is both strong and memorable.'
+  },
+  {
+    id:13, topic:'privacy', level:'beginner', featured:false,
+    icon:'🧹', iconBg:'#F3F0EB',
+    title:'Digital Spring Cleaning: Remove Yourself From Data Broker Sites',
+    desc:'Dozens of websites buy and sell your personal information — name, address, phone number, relatives. This guide shows you how to find yourself on these sites and request removal, for free.',
+    source:'Privacy Rights Clearinghouse', sourceUrl:'https://privacyrights.org',
+    readTime:'9 min read', isNew:false,
+    tags:['Privacy','Beginner'],
+    summary:'Start with the biggest data brokers: Spokeo, BeenVerified, Whitepages, Intelius, and PeopleFinder. Each has a free opt-out process. You can also search "[your name] removal" for each site. The process takes a few weeks to fully process — re-check annually as data often reappears.'
+  },
+  {
+    id:14, topic:'devices', level:'beginner', featured:false,
+    icon:'📶', iconBg:'#EAF1F8',
+    title:'Public Wi-Fi Is Riskier Than You Think — Here\'s How to Stay Safe',
+    desc:'Coffee shop and airport Wi-Fi networks can be monitored by anyone on the same network. Learn which activities are safe on public Wi-Fi, which are risky, and the one tool that protects almost everything.',
+    source:'Electronic Frontier Foundation', sourceUrl:'https://www.eff.org/https-everywhere',
+    readTime:'5 min read', isNew:false,
+    tags:['Devices','Beginner'],
+    summary:'Safe on public Wi-Fi: browsing HTTPS websites (look for the padlock), streaming. Risky: online banking, logging into accounts without 2FA, sending sensitive information. Best protection: a VPN encrypts all your traffic. Free option: Proton VPN has no data limits. Also, forget the network when done so your phone doesn\'t auto-reconnect.'
+  }
+];
+
+function saveKey() {
+  const val = document.getElementById('api-input').value.trim();
+  if (!val.startsWith('sk-')) { showToast('Invalid key — must start with sk-ant-'); return; }
+  apiKey = val;
+  document.getElementById('api-dot').classList.add('live');
+  document.getElementById('api-label').textContent = 'API connected';
+  document.getElementById('refresh-btn').disabled = false;
+  document.getElementById('ask-btn').disabled = false;
+  showToast('API key connected ✓');
+  loadBriefing();
+}
+
+async function loadBriefing() {
+  if (!apiKey) return;
+  const btn = document.getElementById('refresh-btn');
+  const spin = document.getElementById('briefing-spin');
+  btn.style.display = 'none';
+  spin.style.display = 'flex';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true' },
+      body: JSON.stringify({
+        model:'claude-sonnet-4-6', max_tokens:400,
+        messages:[{ role:'user', content:`You are a friendly cybersecurity educator writing for complete beginners — people who are cautious about social media but not tech-savvy.
+
+Write a short daily security tip in this exact JSON format:
+{"title":"[a short, plain-language headline — no jargon]","tip":"[2-3 sentences of practical, friendly advice. Use simple words. No technical terms without explaining them. Focus on social media, passwords, or phishing — things everyday people actually face.]"}
+
+Today's date: ${new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})}. Make the tip timely and practical. JSON only, no other text.` }]
+      })
+    });
+    const data = await res.json();
+    const raw = data.content?.[0]?.text || '{}';
+    const clean = raw.replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(clean);
+    document.getElementById('briefing-title').textContent = parsed.title || 'Your daily security tip';
+    document.getElementById('briefing-body').innerHTML = parsed.tip || '';
+  } catch(e) {
+    document.getElementById('briefing-title').textContent = 'Tip: Check who can see your profile today';
+    document.getElementById('briefing-body').textContent = 'Take 2 minutes to visit your social media privacy settings. Many platforms reset privacy settings after updates. Make sure your profile is set to "Friends only" or "Private" — not Public.';
+  }
+
+  spin.style.display = 'none';
+  btn.style.display = 'inline-block';
+  btn.textContent = '↻ New tip';
+}
+
+async function askClaude() {
+  const q = document.getElementById('ask-input').value.trim();
+  if (!q || !apiKey) return;
+  const btn = document.getElementById('ask-btn');
+  const result = document.getElementById('ask-result');
+  btn.disabled = true;
+  btn.textContent = '…';
+  result.style.display = 'block';
+  result.textContent = 'Thinking…';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-6', max_tokens:500,
+        messages:[{role:'user',content:`You are a friendly, patient cybersecurity educator. Your reader is a complete beginner — someone who is cautious but not technical at all. Answer their question in plain English with zero jargon (or explain any technical term you must use). Keep it reassuring, practical, and under 120 words. Use simple line breaks for readability if needed.
+
+Question: ${q}`}]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text || 'Sorry, something went wrong. Try again.';
+    result.innerHTML = text.replace(/\*\*(.*?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>');
+  } catch(e) {
+    result.textContent = 'Something went wrong. Check your API key and try again.';
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Ask →';
+}
+
+function quickAsk(q) {
+  document.getElementById('ask-input').value = q;
+  if (apiKey) askClaude();
+}
+
+function renderArticles() {
+  const grid = document.getElementById('articles-grid');
+  let list = ARTICLES.filter(a => {
+    const topicMatch = activeTopic === 'all' || a.topic === activeTopic || (activeTopic === 'bookmarks' && bookmarks.has(a.id));
+    const levelMatch = activeLevel === 'all' || a.level === activeLevel;
+    const searchMatch = !searchQuery || a.title.toLowerCase().includes(searchQuery) || a.desc.toLowerCase().includes(searchQuery) || a.tags.join(' ').toLowerCase().includes(searchQuery);
+    return topicMatch && levelMatch && searchMatch;
+  });
+
+  document.getElementById('section-count').textContent = list.length + ' article' + (list.length !== 1 ? 's' : '');
+
+  if (!list.length) {
+    grid.innerHTML = '<div class="empty">No articles match your filters. Try broadening your search.</div>';
+    return;
+  }
+
+  grid.innerHTML = '';
+  list.forEach(a => {
+    const isSaved = bookmarks.has(a.id);
+    const el = document.createElement('div');
+    el.className = 'article-card' + (a.featured ? ' featured' : '');
+    el.innerHTML = `
+      <div class="card-top">
+        <div class="card-icon" style="background:${a.iconBg}">${a.icon}</div>
+        <div class="card-meta">
+          <div class="card-tags">
+            ${a.tags.map(t => `<span class="tag ${t==='Beginner'||t==='Intermediate'?'tag-level':'tag-topic'}">${t}</span>`).join('')}
+            ${a.isNew ? '<span class="tag tag-new">NEW</span>' : ''}
+            <span class="tag tag-read">${a.readTime}</span>
+          </div>
+          <div class="card-title">${a.title}</div>
+          <div class="card-desc">${a.desc}</div>
+          <div class="card-footer">
+            <span class="source-badge">${a.source}</span>
+            <button class="bookmark-btn ${isSaved?'saved':''}" onclick="toggleBookmark(event,${a.id})">${isSaved?'⭐ Saved':'☆ Save'}</button>
+            <a class="read-link" href="${a.sourceUrl}" target="_blank" rel="noopener">Read source ↗</a>
+          </div>
+        </div>
+      </div>`;
+    el.addEventListener('click', (e) => { if (!e.target.closest('a') && !e.target.closest('button')) expandArticle(a); });
+    grid.appendChild(el);
+  });
+}
+
+function expandArticle(a) {
+  const existing = document.getElementById('expanded-'+a.id);
+  if (existing) { existing.remove(); return; }
+  const cards = document.querySelectorAll('.article-card');
+  let target;
+  cards.forEach(c => { if (c.querySelector('.card-title')?.textContent === a.title) target = c; });
+  if (!target) return;
+
+  const box = document.createElement('div');
+  box.id = 'expanded-'+a.id;
+  box.style.cssText = 'background:var(--sage-light);border:1px solid var(--sage-mid);border-radius:var(--r);padding:14px 16px;margin-top:8px;font-size:13px;color:var(--ink2);line-height:1.75;';
+  box.innerHTML = '<b style="color:var(--sage);font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Key takeaway</b>' + a.summary;
+  target.after(box);
+}
+
+function filterTopic(topic, el) {
+  activeTopic = topic;
+  document.querySelectorAll('.topic-btn,.nav-link').forEach(b => b.classList.remove('on'));
+  if (el) el.classList.add('on');
+  const titles = {all:'All Articles',social:'Social Media Safety',passwords:'Passwords & Logins',phishing:'Phishing & Scams',privacy:'Privacy',devices:'Device Security',bookmarks:'Saved Articles'};
+  document.getElementById('section-title').textContent = titles[topic] || 'Articles';
+  renderArticles();
+}
+
+function filterLevel(level, el) {
+  activeLevel = level;
+  document.querySelectorAll('.level-chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  renderArticles();
+}
+
+function searchArticles(val) {
+  searchQuery = val.toLowerCase().trim();
+  renderArticles();
+}
+
+function toggleBookmark(e, id) {
+  e.stopPropagation();
+  if (bookmarks.has(id)) { bookmarks.delete(id); showToast('Removed from saved'); }
+  else { bookmarks.add(id); showToast('Article saved ⭐'); }
+  localStorage.setItem('sr_bookmarks', JSON.stringify([...bookmarks]));
+  renderArticles();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+document.getElementById('ask-input').addEventListener('keydown', e => { if (e.key === 'Enter') askClaude(); });
+renderArticles();
+</script>
+</body>
+</html>
